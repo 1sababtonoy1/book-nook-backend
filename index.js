@@ -177,7 +177,7 @@ app.post('/borrow', verifyToken, async (req, res) => {
     return res.status(409).send({ message: 'You have already borrowed this book.' })
   }
 
-  // Only decrement when a copy is left, so copies can never go below 0.
+
   const decrement = await bookCollection.updateOne(
     { _id: new ObjectId(bookId), copies: { $gt: 0 } },
     { $inc: { copies: -1 } }
@@ -203,13 +203,13 @@ app.post('/borrow', verifyToken, async (req, res) => {
     })
     res.send(result)
   } catch (error) {
-    // Give the copy back if saving the borrow failed.
+
     await bookCollection.updateOne({ _id: new ObjectId(bookId) }, { $inc: { copies: 1 } })
     res.status(500).send({ message: 'Could not borrow the book.' })
   }
 })
 
-// Books the logged-in user has borrowed
+
 app.get('/my-borrows', verifyToken, async (req, res) => {
   const result = await borrowCollection
     .find({ userEmail: req.user.email })
@@ -218,7 +218,7 @@ app.get('/my-borrows', verifyToken, async (req, res) => {
   res.send(result)
 })
 
-// Return a book (only the person who borrowed it)
+
 app.delete('/borrow/:id', verifyToken, async (req, res) => {
   const { id } = req.params
   if (!ObjectId.isValid(id)) {
@@ -233,7 +233,7 @@ app.delete('/borrow/:id', verifyToken, async (req, res) => {
 
   const removed = await borrowCollection.deleteOne({ _id: borrow._id })
 
-  // Only add the copy back if this request actually removed the record.
+  
   if (removed.deletedCount === 1 && ObjectId.isValid(borrow.bookId)) {
     await bookCollection.updateOne(
       { _id: new ObjectId(borrow.bookId) },
