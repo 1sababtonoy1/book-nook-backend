@@ -20,7 +20,6 @@ function getClient() {
   }
   if (!clientPromise) {
     const client = new MongoClient(process.env.MONGODB_URI)
-    // If the connection fails, clear the cache so the next request retries.
     clientPromise = client.connect().catch((err) => {
       clientPromise = null
       throw err
