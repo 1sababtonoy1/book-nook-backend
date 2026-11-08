@@ -66,18 +66,13 @@ const verifyToken = async (req, res, next) => {
   }
 }
 
-// This I took help from AI
+// This I took help
 const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next)
-
-// ---------- Routes ----------
 
 app.get('/', (req, res) => {
   res.send({ message: 'Server is running fine!' })
 })
 
-// ---------- Books ----------
-
-// Public: newest first, optional ?limit=
 app.get(
   '/books',
   wrap(async (req, res) => {
@@ -124,7 +119,6 @@ app.post(
       copies: total,
       imageUrl: imageUrl ?? '',
       description: description ?? '',
-      // Always taken from the token, never from the request body.
       userName: req.user.name,
       userEmail: req.user.email,
     })
@@ -133,7 +127,6 @@ app.post(
   })
 )
 
-// Books added by the logged-in user
 app.get(
   '/my-books',
   verifyToken,
@@ -147,7 +140,6 @@ app.get(
   })
 )
 
-// Edit a book (owner only)
 app.put(
   '/books/:id',
   verifyToken,
@@ -164,7 +156,6 @@ app.put(
       return res.status(403).send({ message: 'You can only edit your own books.' })
     }
 
-    // Only these fields can be changed.
     const { title, author, category, copies, imageUrl, description } = req.body
     const update = { title, author, category, imageUrl, description }
 
@@ -176,7 +167,6 @@ app.put(
       update.copies = total
     }
 
-    // Drop anything that wasn't sent.
     Object.keys(update).forEach((key) => update[key] === undefined && delete update[key])
 
     if (Object.keys(update).length > 0) {
@@ -186,7 +176,7 @@ app.put(
   })
 )
 
-// Delete a book (owner only)
+
 app.delete(
   '/books/:id',
   verifyToken,
@@ -208,7 +198,6 @@ app.delete(
   })
 )
 
-// ---------- Borrowing ----------
 
 app.post(
   '/borrow',
@@ -232,7 +221,6 @@ app.post(
       return res.status(409).send({ message: 'You have already borrowed this book.' })
     }
 
-    // Take one copy only if one is available.
     const decrement = await bookCollection.updateOne(
       { _id: new ObjectId(bookId), copies: { $gt: 0 } },
       { $inc: { copies: -1 } }
@@ -258,7 +246,6 @@ app.post(
       })
       res.send(result)
     } catch (error) {
-      // Put the copy back if saving the borrow record failed.
       await bookCollection.updateOne({ _id: new ObjectId(bookId) }, { $inc: { copies: 1 } })
       console.error('Borrow failed:', error)
       res.status(500).send({ message: 'Could not borrow the book.' })
@@ -279,7 +266,7 @@ app.get(
   })
 )
 
-// Return a book
+
 app.delete(
   '/borrow/:id',
   verifyToken,
@@ -310,14 +297,13 @@ app.delete(
   })
 )
 
-// ---------- Error handler (shows the real cause in Vercel logs) ----------
+
 
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err)
   res.status(500).send({ message: 'Internal server error.', error: err.message })
 })
 
-// ---------- Start (only locally; Vercel uses the exported app) ----------
 
 if (!process.env.VERCEL) {
   app.listen(PORT, () => {
