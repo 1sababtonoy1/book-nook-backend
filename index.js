@@ -11,7 +11,6 @@ const BORROW_DAYS = 7
 app.use(cors())
 app.use(express.json())
 
-// ---------- Database (cached so serverless invocations reuse the connection) ----------
 
 let clientPromise = null
 
