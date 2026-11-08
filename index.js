@@ -66,7 +66,7 @@ const verifyToken = async (req, res, next) => {
   }
 }
 
-// Express 4 does not catch errors thrown in async handlers, so wrap them.
+// This I took help from AI
 const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next)
 
 // ---------- Routes ----------
