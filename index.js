@@ -37,7 +37,7 @@ async function getCollections() {
   }
 }
 
-// ---------- Auth (JWKS is created lazily, so a missing CLIENT_URL only affects protected routes) ----------
+
 
 let JWKS = null
 
@@ -58,7 +58,6 @@ const verifyToken = async (req, res, next) => {
 
   try {
     const { payload } = await jwtVerify(token, getJWKS())
-    // Better Auth puts the user (id, name, email, image...) in the payload.
     req.user = payload
     next()
   } catch (err) {
